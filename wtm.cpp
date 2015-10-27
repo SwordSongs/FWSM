@@ -1,177 +1,191 @@
 #include <iostream>
 #include <vector>
+#include <string>
+#include <cmath>
 
 #include "kmp.h"
 #include "defs.h"
+#include "global.h"
 
 using namespace std;
 
-unsigned int WTM ( unsigned char * x, unsigned int m, double ** y, unsigned int n, double z, unsigned char * alphabet )
+unsigned int WTM ( double z, string alphabet, vector < unsigned int > * Occ )
 {
-	unsigned int sigma = strlen ( ( char * ) alphabet );
-	unsigned int num_Occ = 0;
+	unsigned int sigma		= alphabet.size();
+	unsigned int m			= xy.pattern.size();
+	unsigned int n			= xy.text.size();
+	unsigned char * x		= new unsigned char [m];
+	unsigned char * y		= new unsigned char [n];
+	unsigned int l			= ceil ( log ( z ) / log ( z / ( z - 1 ) ) );
+	unsigned int num_frag	= l + 1;
+	unsigned int num_Occ	= 0;
 
-	/* Colouring y */
-	unsigned char colour[n];
-	unsigned char stry[n];
-	unsigned int letter[n];
-	vector < unsigned int > BP;
+	if ( num_frag > m )
+	{
+		num_frag = m;
+	}
+
+	for ( unsigned int i = 0; i < m; i++ )
+	{
+		x[i] = alphabet[ xy.pattern[i] ];
+	}
 
 	for ( unsigned int i = 0; i < n; i++ )
 	{
-		double max_prob = 0;
-		for ( unsigned int j = 0; j < sigma; j++ )
+		unsigned int ch = xy.text[i];
+		if ( ch < sigma )
 		{
-			if ( max_prob < y[i][j] )
-			{
-				max_prob = y[i][j];
-				letter[i] = j;
-			}
-		}
-		if ( max_prob == 1 )
-		{
-			colour[i] = 'w';
-			stry[i] = alphabet[ letter[i] ];
-		}
-		else if ( max_prob > 1/z )
-		{
-			colour[i] = 'g';
-			stry[i] = alphabet[ letter[i] ];
+			y[i] = alphabet[ch];
 		}
 		else
 		{
-			colour[i] = 'b';
-			stry[i] = '$';
-			BP.push_back[i];
+			y[i] = '$';
 		}
 	}
 
-	unsigned int num_bp = BP.size();
+	Factor	F	= new Factor [num_frag];
+	int		ind	= new int [num_frag];		//the starting position of fragments
+	int		mf	= new int [num_frag];		//the length of fragments
 
-	unsigned int s[n - m + 1];
-	s[0] = 0;
-	for ( unsigned int i = 0; i < m; i++ )
+	for ( unsigned int i = 0; i < num_frag; i++ )
 	{
-		if ( colour[i] == 'b' )
-			s[0] ++;
-	}
-	unsigned int max_s = s[0];
-	for ( unsigned int i = 1; i < n - m + 1; i++ )
-	{
-		if ( colour[i - 1] == 'b' )
-			s[i] = s[i - 1] - 1;
-		if ( colour[i + m - 1] == 'b' )
-			s[i] = s[i] + 1;
-		if ( s[i] > max_s )
-			max_s = s[i];
+		fragments ( 0, i, num_frag, m, nf, ind );
+		F[i].length	= mf[i];
+		F[i].start	= ind[i];
+		F[i].end	= ind[i] + mf[i] - 1;
+		F[i].prob	= 1;
 	}
 
-	if ( max_s >=m )
-	{
-		cout << "Error: too many black positions in string y!" << endl;
-		return 0;
-	}
-
-	unsigned int f = max_s + 1;				//the number of fragments
-
-	int * ind = new int [f];				//the starting position of eacn fragments
-	int * mf = new int [f];					//the length of each fragment
-
-	for ( int j = 0; j < f; j++ )
-		fragments ( 0, j, f, m, mf, ind );
-
-	/* Check whether there exists duplicated fragments */
+	/* Check whether there exist duplicated fragments */
 	char ** seqs;
-	int	* dups = new int [f];
+	int	 *	dups;
 
+	dups = new int [num_frag];
 	unsigned int uniq;
-	uniq = extract_dups_single_str ( x, m, f, mf, ind, dups );
+	uniq = extract_dups_single_str ( x, m, num_frag, mf, ind, dups );
 
-	int * d_occ = new int [f];
-	int * l_occ = new int [f];
+	int * d_occ = new int [num_frag];
+	int * l_occ = new int [num_frag];
 
-	for ( unsigned int j = 0; j < f; j++ )
+	for ( unsigned int i = 0; i < num_frag; i++ )
 	{
-		d_occ[j] = -1;
-		l_occ[j] = -1;
+		d_occ[i] = -1;
+		l_occ[i] = -1;
 	}
 
 	/* In case there exist duplicated fragments */
-	if ( uniq < f )
+	if ( uniq < num_frag ) 
 	{
-		seqs = new char * [f];
-		for ( unsigned int j = 0; j < f; j++ )
+		seqs = new char * [num_frag];
+		for ( unsigned int i = 0; i < num_frag; i++ )
 		{
-			unsigned int f_id = j;
-
 			/* Add the fragment once */
-			if ( dups[f_id] < 0 )
+			if ( dups[i] < 0 )
 			{
-				seqs[f_id] = new char [ mf[f_id] + 1 ];
-				memcpy( seqs[f_id], x + ind[f_id], mf[f_id] );
-				seqs[f_id][ mf[f_id] ] = '\0';
+				seqs[i] = new int [ mf[i] + 1 ];
+				memmove ( seqs, x + ind[i], mf[i] );
+				seqs[i][i] = '\0';
 			}
 			else
 			{
-				seqs[f_id] = new char [1];
-				seqs[f_id][0] = '\0';
+				/* add nothing since it is already added */
+				seqs[i] = new int [1];
+				seqs[i][0] = '\0';
 
-				if ( l_occ[ dups[f_id] ] == -1 )	//if it is the first duplicated fragment
-					d_occ[ dups[f_id] ] = f_id;
+				if ( l_occ[dups[i]] == -1 )
+					d_occ[dups[i]] = i;
 				else
-					d_occ[ l_occ[ dups[f_id] ] ] = f_id;
-				l_occ[ dups[f_id] ] = f_id;
+					d_occ[ l_occ[ dups[i] ] ] = i;
+				l_occ[dups[i]] = i;
 			}
 		}
 	}
 	else
 	{
-		seqs = new char * [f];
-		for ( unsigned int j = 0; j < f; j++ )
+		/* all all the fragments since there exist no duplicated fragments */
+		seq = new int [num_frag];
+		for ( unsigned int i = 0; i < num_frag; i++ )
 		{
-			unsigned int f_id = j;
-			seqs[f_id] = new char [ mf[f_id] + 1 ];
-			memcpy( seqs[f_id], x + ind[f_id], mf[f_id] );
-			seqs[f_id][ mf[f_id] ] = '\0';
+			seqs[i] = new [ mf[i] + 1 ];
+			memmove ( seqs[i], x + ind[i]; mf[i] );
+			seqs[i][mf[i]] = '\0';
 		}
 	}
 
-	int * F = new int [ALLOC_SIZE];
-	int * P = new int [ALLOC_SIZE];
+	int * frag_id	= new int [ALLOC_SIZE];
+	int * frag_occ	= new int [ALLOC_SIZE];
+	unsigned int matches = 0;
+	matches = ( seqs, num_frag, y, n, frag_id, frag_occ );
 
-	int matches;
-
-	gF = F;
-	gP = P;
-
-	filtering ( ( char * ) y, n, ( char ** ) seqs, f );
-
-	F = gF;
-	P = gP;
-	matches = gMatches;
-
-	for ( int i = 0; i < matches; i++ )
+	for ( unsigned int i = 0; i < matches; i++ )
 	{
-		int jj = F[i];				//the ID of fragment
-		do
+		int id = frag_id[i];
+		do 
 		{
-			if ( ( ind[jj] + mf[jj] >= P[jj] && ( n - P[i] >= m - mf[ii] - ind[ii];
-			unsigned int ystart = P[i] - mf[jj];
+			if ( ( frag_occ[i] >= F[id].start ) && ( n - frag_occ[i] >= m - f.start ) )
+			{
+				unsigned int ystart = frag_occ[i] - F[id].start;
+				unsigned int flag = 1;
+				double prob_Occ = F[id].prob;
+
+				unsigned int j = 0;
+				while ( j < m )
+				{
+					if ( xy.text[ystart + j] < sigma )
+					{
+						if ( xy.text[ystart + j] != xy.pattern[j] )
+						{
+							flag = 0;
+							break;
+						}
+						else
+						{
+							prob_Occ *= xy.prob[j];
+							if ( prob_Occ < 1/z )
+							{
+								flag = 0;
+								break;
+							}
+							else
+							{
+								j++;
+							}
+						}
+					}
+					else
+					{
+						unsigned int row = xy.text[ystart + j] - sigma;
+						unsigned int col = xy.pattern[j];
+						prob_Occ *= xy.bptable[row][col];
+						if ( prob_Occ < 1/z )
+						{
+							flag = 0;
+							break;
+						}
+						else
+						{
+							j++;
+						}
+					}
+					if ( j == F[id].start )
+					{
+						j = F[id].end + 1;
+					}
+				}
+			}
+			if ( flag )
+			{
+				Occ->push_back = ystart;
+				num_Occ ++;
+			}
+		} while ( id != -1 );
+	}
+
+	return num_Occ;
+}
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+				
 
 
 

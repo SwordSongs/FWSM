@@ -1,11 +1,10 @@
 #include <vector>
-#include <iostream>
 
 #include "kmp.h"
 
 using namespace std;
 
-void preKMP ( unsigned char * x, unsigned int m, int kmpNext[] )
+void preKMP ( unsigned int * x, unsigned int m, int kmpNext[] )
 {
 	int i, j;
 
@@ -24,7 +23,7 @@ void preKMP ( unsigned char * x, unsigned int m, int kmpNext[] )
 	}
 }
 
-void KMP ( unsigned char * x, unsigned int m, unsigned char * y, unsigned int n, vector < unsigned int > * Occ )
+void KMP ( unsigned int * x, unsigned int m, unsigned int * y, unsigned int n, vector < unsigned int > * Occ )
 {
 	int i, j;
 

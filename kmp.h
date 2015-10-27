@@ -3,4 +3,4 @@
 
 using namespace std;
 
-void KMP ( unsigned char * x, unsigned int m, unsigned char * y, unsigned int n, vector < unsigned int > * Occ );
+void KMP ( unsigned int * x, unsigned int m, unsigned int * y, unsigned int n, vector < unsigned int > * Occ );

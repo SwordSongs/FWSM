@@ -2,77 +2,202 @@
 #include <fstream>
 #include <string>
 #include <vector>
-#include <cstring>
+#include <time.h>
 
 #include "defs.h"
+#include "global.h"
 
 using namespace std;
 
 int main (int argc, char **argv)
 {
-	if ( argc == 4 )
-	{
-		unsigned int m = 0;
-		unsigned int sigma = strlen( DNA );
-		unsigned char * alphabet = new unsigned char [ sigma ];
-		memcpy ( alphabet, DNA, sigma );
-		double z = 1.0;
-		sscanf ( argv[3], "%lf", &z );
+	TSwitch sw;
+	string alphabet;
+	unsigned int sigma;
+	int mod;
+	string pattern_file;
+	string text_file;
+	string output;
+	double z;
+	string x;				//normal string
+	unsigned int m;			//length of x
+	double ** y;			//weighted string
+	unsigned int n;			//length of y
+	WStr xystr;
 
-		ifstream ReadX;
-		string tmp1;
-		ReadX.open ( argv[1] );
-		if ( ReadX.fail() )
-			cout << "Cannot open the file" << endl;
+	clock_t start;
+	clock_t finish;
+
+	unsigned int k;
+
+	/* Decodes the arguments */
+	k = decode_switches ( argc, argv, &sw );
+
+	/* Check the arguments */
+	if ( k < 9 )
+	{
+		usage();
+		return 1;
+	}
+	else
+	{
+		if ( sw.alphabet.compare ( "DNA" ) == 0 )
+		{
+			alphabet = DNA;
+			sigma = alphabet.size();
+		}
+		else if ( sw.alphabet.compare ( "dna" ) == 0 )
+		{
+			alphabet = dna;
+			sigma = alphabet.size();
+		}
 		else
 		{
-			while ( getline ( ReadX, tmp1, '\n' ) )
-				m++;
+			cout << "Error: Only support DNA alphabet up to now!" << endl;
+			return 0;
 		}
-		ReadX.close();
 
-		ifstream in ( argv[1] );
-		double ** x;
-		x = new double * [m];
-		for ( unsigned int i = 0; i < m; i++ )
-			x[i] = new double [sigma];
-		for ( unsigned int i = 0; i < m; i++ )
+		mod = sw.mod;
+		if ( sw.mod > 2 )
+		{	
+			cout << "Error: Mode (-m) not correct!" << endl;
+			return 0;
+		}
+		else
 		{
-			for ( unsigned int j = 0; j < sigma; j++ )
+			mod = sw.mod;
+		}
+
+		if ( sw.pattern_file_name.size() == 0 )
+		{
+			cout << "Error: No Pattern input!" << endl;
+			return 0;
+		}
+		else
+		{
+			pattern_file = sw.pattern_file_name;
+		}
+
+		if ( sw.text_file_name.size() == 0 )
+		{
+			cout << "Error: No Text input!" << endl;
+			return 0;
+		}
+		else
+		{
+			text_file = sw.text_file_name;
+		}
+
+		if ( sw.output_filename.size() == 0 )
+		{
+			output = "MatchingReport";		
+		}
+		else
+		{
+			output = sw.output_filename;
+		}
+
+		if ( z > 0 )
+		{
+			z = sw.z;
+		}
+		else 
+		{
+			cout << "Error: z must be a position integer!" << endl;
+		}
+	}
+
+	/* read input Weighted String */
+	ifstream fpattern ( pattern_name );
+	ifstream ftext ( text_name );
+	if ( fpattern.fail() )
+	{
+		cout << "Error: Cannot open pattern file!" << endl;
+		return 0;
+	}
+	else if ( ftext.fail() )
+	{
+		cout << "Error: Cannot open text file!" << endl;
+	else
+	{
+		if ( mod == 1 )
+		{
+			/* WPM */
+			ftext >> x;
+			vector < double > temptable;
+			double temp;
+			while ( !fpattern.eof () )
 			{
-				in >> x[i][j];
+				fpattern >> temp;
+				temparray.push_back ( temp );
+			}
+			unsigned int column = sigma;
+			unsigned int row = temparray.size() / column;
+			y = new double * [row];
+			for ( unsigned int i = 0; i < row; i++ )
+				y[i] = new double [column];
+			for ( unsigned int i = 0; i < row; i++ )
+			{
+				for ( unsigned int i = 0; j < column; j++ )
+				{
+					y[i][j] = temparray[j + i * column];
+				}
+				n = row;
 			}
 		}
-		in.close();
-
-		ifstream ReadY;
-		ReadY.open ( argv[2] );
-		string tmp2;
-		if ( ReadY.fail() )
-			cout << "Cannot open the file" << endl;
-		else
+		else if ( mod == 2 )
 		{
-			getline( ReadY, tmp2 );
+			/* WTM */
+			fpattern >> x;
+			vector < double > temptable;
+			double temp;
+			while ( !ftext.eof () )
+			{
+				ftext >> temp;
+				temparray.push_back ( temp );
+			}
+			unsigned int column = sigma;
+			unsigned int row = temparray.size() / column;
+			y = new double * [row];
+			for ( unsigned int i = 0; i < row; i++ )
+				y[i] = new double [column];
+			for ( unsigned int i = 0; i < row; i++ )
+			{
+				for ( unsigned int i = 0; j < column; j++ )
+				{
+					y[i][j] = temparray[j + i * column];
+				}
+				n = row;
+			}
 		}
-		unsigned int n = tmp2.length();
-		unsigned char * y = new unsigned char [ n + 1];
-		memcpy ( y, tmp2.c_str(), n );
-		ReadY.close();
+	}
+	fpattern.close();
+	ftext.close();
+	
+	start = clock();
+	preparation ( x, y, n, z, alphabet, mod );
 
-		unsigned int * Occ = new unsigned int [m];
-		unsigned int num_Occ;
-		num_Occ = WMP ( x, m, y, n, z, alphabet, Occ );
-		cout << "The number of Occurrence: " << num_Occ << endl;
-		for ( unsigned int i = 0; i < num_Occ; i++ )
-			cout << "x occurs in y at position " << Occ[i] << endl;
-
-		delete[] Occ;
-		delete[] y;
-		for ( unsigned int i = 0; i < m; i++ )
-			delete[] x[i];
-		delete[] x;
-		delete[] alphabet;
+	vector < unsigned int > Occ;
+	unsigned int Occ_number;
+	if ( mod == 1 )
+	{
+		Occ_number = matching ( m, alphabet, z, &Occ );
+	}
+	if ( mod == 2 )
+	{
+		Occ_number = matching ( n, alphabet, z, &Occ );
 	}
 	
+	finish = clock();
+	double passtime = (	double ) ( finish - start ) / CLOCKS_PER_SEC;
+	cout << "Elapsed time is " << passtime << endl;
+	/*print result*/
+	ofstream result ( output );
+	result << "The number of occurrances is " << Occ_number << endl;
+	result << "The positions of each occurrances:" << endl;
+	for ( unsigned int i = 0; i < Occ_number; i++ )
+	result << "Occur at position " << Occ[i] << endl;
+	result.close();
+
 	return 0;
 }
