@@ -21,6 +21,7 @@ int decode_switches ( int argc, char * argv[], struct TSwitch * sw )
 	char *ep;
 	int val;
 	int args;
+	string mod;
 
 	/* initialisation */
 	sw -> z						=	1;
@@ -28,7 +29,7 @@ int decode_switches ( int argc, char * argv[], struct TSwitch * sw )
 
 	args = 0;
 
-	while ( ( opt = getopt_long ( argc, argv, "a:m:p:t:o:h", long_options, NULL ) ) != -1 )
+	while ( ( opt = getopt_long ( argc, argv, "a:m:p:t:o:z:h", long_options, NULL ) ) != -1 )
 	{
 		switch ( opt )
 		{
@@ -37,13 +38,15 @@ int decode_switches ( int argc, char * argv[], struct TSwitch * sw )
 				args ++;
 				break;
 			case 'm':
+				mod = optarg;
+				cout << mod << endl;
 				if ( optarg == "wpm" )
 				{
-					mod = 1;	
+					sw -> mod = 1;	
 				}
 				else if ( optarg == "wtm" )
 				{
-					mod = 2;
+					sw -> mod = 2;
 				}
 				else
 				{
@@ -79,6 +82,7 @@ int decode_switches ( int argc, char * argv[], struct TSwitch * sw )
 
 	if ( args < 4 )
 	{
+		cout << "args < 4" << endl;
 		usage();
 		exit ( 1 );
 	}
