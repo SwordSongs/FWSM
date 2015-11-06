@@ -11,12 +11,13 @@ using namespace std;
 
 unsigned int WPM ( double z, string alphabet, vector < unsigned int > * Occ )
 {
+	cout << "WPM:wpm" << endl;
 	unsigned int sigma = alphabet.size();		//size of alphabet
 	unsigned int num_Occ = 0;					//the number of occurrence of x in y
 	unsigned int m = xy.pattern.size();			//length of pattern
 	unsigned int n = xy.text.size();			//length of text
 
-	unsigned int num_bp = BP.size();
+	unsigned int num_bp = xy.BP.size();
 	
 	if ( num_bp >= m )								//the number of black position must be smaller than the length of x
 	{
@@ -28,6 +29,9 @@ unsigned int WPM ( double z, string alphabet, vector < unsigned int > * Occ )
 	Factor f;
 	f.length = 0;
 	f.prob = 1;
+	for ( unsigned int i = 0; i < num_bp; i++ )
+		cout << xy.BP[i] << ' ';
+	cout << endl;
 
 	for ( unsigned int i = 1; i < num_bp; i++ )
 	{
@@ -38,6 +42,10 @@ unsigned int WPM ( double z, string alphabet, vector < unsigned int > * Occ )
 			f.end = xy.BP[i] - 1;
 		}
 	}
+
+	cout << "FACTOR:" << endl;
+	cout << "length=" << f.length << endl;
+	cout << "start=" << f.start << "\tend=" << f.end << endl;
 
 	f.str = &xy.pattern[f.start];
 
@@ -60,7 +68,7 @@ unsigned int WPM ( double z, string alphabet, vector < unsigned int > * Occ )
 			unsigned int ystart = fOcc[i] - f.start;
 			unsigned int flag = 1;										//Check if f is extendible, 1 for extendible
 			double prob_Occ = f.prob;									//the probability of occurrence
-			if ( prob_Occ < 1/z )
+			if ( prob_Occ < 1/z )										//if the pattern is not valid
 			{
 				flag = 0;
 			}
@@ -69,7 +77,7 @@ unsigned int WPM ( double z, string alphabet, vector < unsigned int > * Occ )
 				unsigned int j = 0;
 				while ( j < m )
 				{
-					if ( xy.text[ystart + j] < sigma )
+					if ( xy.pattern[j] < sigma )						//if the letter in pattern is not black
 					{
 						if ( xy.text[ystart + j] != xy.pattern[j] )
 						{
@@ -79,7 +87,7 @@ unsigned int WPM ( double z, string alphabet, vector < unsigned int > * Occ )
 						else
 						{
 							prob_Occ *= xy.prob[j];
-							if ( prob_Occ < 1/z )
+							if ( prob_Occ < 1/z )						//if the probability is not valid
 							{
 								flag = 0;
 								break;
@@ -92,8 +100,8 @@ unsigned int WPM ( double z, string alphabet, vector < unsigned int > * Occ )
 					}
 					else
 					{
-						unsigned int row = xy.text[ystrat + j] - sigma;
-						unsigned int col = xy.pattern[j];
+						unsigned int row = xy.pattern[j] - sigma;
+						unsigned int col = xy.text[ystart + j];
 						prob_Occ *= xy.bptable[row][col];
 						if ( prob_Occ < 1/z )
 						{
@@ -107,14 +115,14 @@ unsigned int WPM ( double z, string alphabet, vector < unsigned int > * Occ )
 					}
 					if ( j == f.start )
 					{
-						/* when left extension meets the factor, jump the factor*/
+						/* when left extension meets the factor, jump the factor */
 						j = f.end + 1;
 					}
 				}
 			}
 			if ( flag )
 			{
-				Occ->push_back = ystart;
+				Occ->push_back ( ystart );
 				num_Occ ++;
 			}
 		}

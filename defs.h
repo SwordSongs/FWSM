@@ -17,7 +17,7 @@ struct TSwitch
 	string	text_file_name;
 	string	output_file_name;
 	string	alphabet;
-}
+};
 #endif
 
 #ifndef STRINGS_H
@@ -44,6 +44,11 @@ struct Factor
 };
 #endif
 
-unsigned int WPM ( double ** x, unsigned int m, unsigned char * y, unsigned int n, double z, unsigned char * alphabet, unsigned int * Occ );
-
-unsigned int WTM ( unsigned char * x, unsigned int m, double ** y, unsigned int n, double z, unsigned char * alphabet, unsigned int * Occ );
+int decode_switches ( int argc, char * argv[], struct TSwitch * sw );
+void usage ( void );
+void preparation ( string x, double **y, unsigned int n, double z, string alphabet, int mod );
+void KMP ( unsigned int * x, unsigned int m, unsigned int * y, unsigned int n, vector < unsigned int > * Occ );
+unsigned int WPM ( double z, string alphabet, vector < unsigned int > * Occ );
+unsigned int WTM ( double z, string alphabet, vector < unsigned int > * Occ );
+void fragments ( int i, int j, int f, unsigned int m, int * mf, int * ind );
+unsigned int extract_dups_single_str ( unsigned char * xx, unsigned int m, unsigned int f, int * mf, int * ind, int * dups );

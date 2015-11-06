@@ -5,12 +5,12 @@
 #include <time.h>
 
 #include "defs.h"
-#include "global.h"
 
 using namespace std;
 
 int main (int argc, char **argv)
 {
+	cout << "123" << endl;
 	TSwitch sw;
 	string alphabet;
 	unsigned int sigma;
@@ -23,19 +23,18 @@ int main (int argc, char **argv)
 	unsigned int m;			//length of x
 	double ** y;			//weighted string
 	unsigned int n;			//length of y
-	WStr xystr;
-
-	clock_t start;
-	clock_t finish;
+	unsigned int num_Occ;
+	vector < unsigned int > Occ;
 
 	unsigned int k;
 
 	/* Decodes the arguments */
-	k = decode_switches ( argc, argv, &sw );
+//	k = decode_switches ( argc, argv, &sw );
 
 	/* Check the arguments */
-	if ( k < 9 )
+/*	if ( k < 0 )
 	{
+		cout << "k = " << k  << endl;
 		usage();
 		return 1;
 	}
@@ -88,13 +87,13 @@ int main (int argc, char **argv)
 			text_file = sw.text_file_name;
 		}
 
-		if ( sw.output_filename.size() == 0 )
+		if ( sw.output_file_name.size() == 0 )
 		{
 			output = "MatchingReport";		
 		}
 		else
 		{
-			output = sw.output_filename;
+			output = sw.output_file_name;
 		}
 
 		if ( z > 0 )
@@ -106,10 +105,14 @@ int main (int argc, char **argv)
 			cout << "Error: z must be a position integer!" << endl;
 		}
 	}
-
+*/
 	/* read input Weighted String */
-	ifstream fpattern ( pattern_name );
-	ifstream ftext ( text_name );
+	ifstream fpattern ( "pattern" );
+	ifstream ftext ( "text" );
+	alphabet = DNA;
+	sigma = alphabet.size();
+	mod = 2;
+	z = 88888888;
 	if ( fpattern.fail() )
 	{
 		cout << "Error: Cannot open pattern file!" << endl;
@@ -118,6 +121,7 @@ int main (int argc, char **argv)
 	else if ( ftext.fail() )
 	{
 		cout << "Error: Cannot open text file!" << endl;
+	}
 	else
 	{
 		if ( mod == 1 )
@@ -129,24 +133,26 @@ int main (int argc, char **argv)
 			while ( !fpattern.eof () )
 			{
 				fpattern >> temp;
-				temparray.push_back ( temp );
+				temptable.push_back ( temp );
 			}
 			unsigned int column = sigma;
-			unsigned int row = temparray.size() / column;
+			cout << column;
+			unsigned int row = temptable.size() / column;
 			y = new double * [row];
 			for ( unsigned int i = 0; i < row; i++ )
 				y[i] = new double [column];
 			for ( unsigned int i = 0; i < row; i++ )
 			{
-				for ( unsigned int i = 0; j < column; j++ )
+				for ( unsigned int j = 0; j < column; j++ )
 				{
-					y[i][j] = temparray[j + i * column];
+					y[i][j] = temptable[j + i * column];
 				}
 				n = row;
 			}
 		}
 		else if ( mod == 2 )
 		{
+			cout << mod << endl;
 			/* WTM */
 			fpattern >> x;
 			vector < double > temptable;
@@ -154,18 +160,18 @@ int main (int argc, char **argv)
 			while ( !ftext.eof () )
 			{
 				ftext >> temp;
-				temparray.push_back ( temp );
+				temptable.push_back ( temp );
 			}
 			unsigned int column = sigma;
-			unsigned int row = temparray.size() / column;
+			unsigned int row = temptable.size() / column;
 			y = new double * [row];
 			for ( unsigned int i = 0; i < row; i++ )
 				y[i] = new double [column];
 			for ( unsigned int i = 0; i < row; i++ )
 			{
-				for ( unsigned int i = 0; j < column; j++ )
+				for ( unsigned int j = 0; j < column; j++ )
 				{
-					y[i][j] = temparray[j + i * column];
+					y[i][j] = temptable[j + i * column];
 				}
 				n = row;
 			}
@@ -173,31 +179,24 @@ int main (int argc, char **argv)
 	}
 	fpattern.close();
 	ftext.close();
-	
-	start = clock();
+	cout << "!£" << endl;
 	preparation ( x, y, n, z, alphabet, mod );
+	cout << "455" << endl;
 
-	vector < unsigned int > Occ;
-	unsigned int Occ_number;
-	if ( mod == 1 )
+	switch ( mod )
 	{
-		Occ_number = matching ( m, alphabet, z, &Occ );
+		case 1:
+			num_Occ = WPM ( z, alphabet, &Occ );
+			break;
+		case 2:
+			num_Occ = WTM ( z, alphabet, &Occ );
+			break;
 	}
-	if ( mod == 2 )
+
+	for ( unsigned int i = 0; i < num_Occ; i++ )
 	{
-		Occ_number = matching ( n, alphabet, z, &Occ );
+		cout << Occ[i] << endl;
 	}
-	
-	finish = clock();
-	double passtime = (	double ) ( finish - start ) / CLOCKS_PER_SEC;
-	cout << "Elapsed time is " << passtime << endl;
-	/*print result*/
-	ofstream result ( output );
-	result << "The number of occurrances is " << Occ_number << endl;
-	result << "The positions of each occurrances:" << endl;
-	for ( unsigned int i = 0; i < Occ_number; i++ )
-	result << "Occur at position " << Occ[i] << endl;
-	result.close();
 
 	return 0;
 }

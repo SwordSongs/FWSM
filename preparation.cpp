@@ -1,3 +1,4 @@
+#include <iostream>
 #include <vector>
 #include <string>
 
@@ -27,7 +28,7 @@ void preparation ( string x, double ** y, unsigned int n, double z, string alpha
 	for ( unsigned int i = 0; i < n; i++ )
 	{
 		double max = 0;
-		unsigned int letter = -1;
+		unsigned int letter = 0;
 		for ( unsigned int j = 0; j < sigma; j++ )
 		{
 			if ( max < y[i][j] )
@@ -72,9 +73,4 @@ void preparation ( string x, double ** y, unsigned int n, double z, string alpha
 		xy.bptable = ybptable;
 	}
 }
-
-			
-
-
-
 
