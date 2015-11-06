@@ -16,7 +16,6 @@ int gMatches = 0;
 
 unsigned int WTM ( double z, string alphabet, vector < unsigned int > * Occ )
 {
-	cout << "123" << endl;
 	unsigned int sigma		= alphabet.size();
 	unsigned int m			= xy.pattern.size();
 	unsigned int n			= xy.text.size();
@@ -36,12 +35,6 @@ unsigned int WTM ( double z, string alphabet, vector < unsigned int > * Occ )
 		x[i] = alphabet[ xy.pattern[i] ];
 	}
 
-	for ( unsigned int i = 0; i < m; i++ )
-	{
-		cout << x[i];
-	}
-	cout << endl;
-
 	for ( unsigned int i = 0; i < n; i++ )
 	{
 		unsigned int ch = xy.text[i];
@@ -54,12 +47,6 @@ unsigned int WTM ( double z, string alphabet, vector < unsigned int > * Occ )
 			y[i] = '$';
 		}
 	}
-
-	for ( unsigned int i = 0; i < n; i++ )
-	{
-		cout << y[i];
-	}
-	cout << endl;
 
 	Factor * F	= new Factor [num_frag];
 	int	*	ind	= new int [num_frag];		//the starting position of fragments
@@ -82,9 +69,6 @@ unsigned int WTM ( double z, string alphabet, vector < unsigned int > * Occ )
 		seqs[i] = new unsigned char [ mf[i] + 1 ];
 		memmove ( seqs[i], x + ind[i], mf[i] );
 		seqs[i][ mf[i] ] = '\0';
-		for ( unsigned int j = 0; j < mf[i]; j++ )
-			cout << seqs[i][j] << ' ';
-		cout << endl;
 	}
 #if 0
 	int	 *	dups;
@@ -155,12 +139,9 @@ unsigned int WTM ( double z, string alphabet, vector < unsigned int > * Occ )
 	frag_occ = gP;
 	matches = gMatches;
 
-	cout << "matches=" << matches << endl;
-
 	for ( unsigned int i = 0; i < matches; i++ )
 	{
 		int id = frag_id[i];
-		cout << "id=" << frag_id[i] << "\tocc=" << frag_occ[i] << endl;
 //		do 
 //		{
 			if ( ( frag_occ[i] >= F[id].start ) && ( n - frag_occ[i] >= m - F[id].start ) )

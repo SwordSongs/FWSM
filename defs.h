@@ -51,4 +51,3 @@ void KMP ( unsigned int * x, unsigned int m, unsigned int * y, unsigned int n, v
 unsigned int WPM ( double z, string alphabet, vector < unsigned int > * Occ );
 unsigned int WTM ( double z, string alphabet, vector < unsigned int > * Occ );
 void fragments ( int i, int j, int f, unsigned int m, int * mf, int * ind );
-unsigned int extract_dups_single_str ( unsigned char * xx, unsigned int m, unsigned int f, int * mf, int * ind, int * dups );

@@ -112,7 +112,7 @@ int main (int argc, char **argv)
 	alphabet = DNA;
 	sigma = alphabet.size();
 	mod = 2;
-	z = 88888888;
+	z = 256;
 	if ( fpattern.fail() )
 	{
 		cout << "Error: Cannot open pattern file!" << endl;
@@ -152,7 +152,6 @@ int main (int argc, char **argv)
 		}
 		else if ( mod == 2 )
 		{
-			cout << mod << endl;
 			/* WTM */
 			fpattern >> x;
 			vector < double > temptable;
@@ -179,9 +178,7 @@ int main (int argc, char **argv)
 	}
 	fpattern.close();
 	ftext.close();
-	cout << "!£" << endl;
 	preparation ( x, y, n, z, alphabet, mod );
-	cout << "455" << endl;
 
 	switch ( mod )
 	{
