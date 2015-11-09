@@ -4,13 +4,13 @@ CC=     g++
  
 CFLAGS= -g -fopenmp -msse4.2 -fomit-frame-pointer -funroll-loops 
  
-LFLAGS= -std=c++11 -O3 -DNDEBUG -lahocorasick -I ./ahocorasick -L ./ahocorasick
+LFLAGS= -std=c++11 -lahocorasick -I ./ahocorasick -L ./ahocorasick -I ./libdatrie/include -L ./libdatrie/lib -ldatrie -Wl,-rpath=$(PWD)/libdatrie/lib -lz -DNDEBUG 
 
 EXE=    example
  
 SRC=    main.cpp input.cpp preparation.cpp wpm.cpp kmp.cpp wtm.cpp aca.cpp filter.cpp
  
-HD=     global.h defs.h aca.h   Makefile
+HD=     global.h defs.h aca.h trie.h  Makefile
  
 # 
 # No need to edit below this line 

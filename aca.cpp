@@ -33,7 +33,6 @@ int match_handler( AC_MATCH_t * m, int * param )
 	unsigned int j;
 	//printf ("@ %ld : ", m->position - 1);
 
-	int gMax_alloc_matches = 0;
 	for ( j = 0; j < m->match_num; j++ )
 	{
 		//fprintf(stderr, "pos:%d id:%d.\n",  m -> position - m->patterns[j].length, m->patterns[j].rep.number);

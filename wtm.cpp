@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <algorithm>
 #include <cmath>
 #include <cstring>
 
@@ -13,14 +14,15 @@ using namespace std;
 int * gF = NULL;
 int * gP = NULL;
 int gMatches = 0;
+int gMax_alloc_matches = ALLOC_SIZE;
 
 unsigned int WTM ( double z, string alphabet, vector < unsigned int > * Occ )
 {
 	unsigned int sigma		= alphabet.size();
 	unsigned int m			= xy.pattern.size();
 	unsigned int n			= xy.text.size();
-	unsigned char * x		= new unsigned char [m];
-	unsigned char * y		= new unsigned char [n];
+	unsigned char * x		= new unsigned char [m + 1];
+	unsigned char * y		= new unsigned char [n + 1];
 	unsigned int l			= ceil ( log ( z ) / log ( z / ( z - 1 ) ) );
 	unsigned int num_frag	= l + 1;
 	unsigned int num_Occ	= 0;
@@ -34,6 +36,7 @@ unsigned int WTM ( double z, string alphabet, vector < unsigned int > * Occ )
 	{
 		x[i] = alphabet[ xy.pattern[i] ];
 	}
+	x[m] = '\0';
 
 	for ( unsigned int i = 0; i < n; i++ )
 	{
@@ -47,6 +50,7 @@ unsigned int WTM ( double z, string alphabet, vector < unsigned int > * Occ )
 			y[i] = '$';
 		}
 	}
+	y[n] = '\0';
 
 	Factor * F	= new Factor [num_frag];
 	int	*	ind	= new int [num_frag];		//the starting position of fragments
@@ -63,15 +67,9 @@ unsigned int WTM ( double z, string alphabet, vector < unsigned int > * Occ )
 
 	/* Check whether there exist duplicated fragments */
 	unsigned char ** seqs;
-	seqs = new unsigned char * [num_frag];
-	for ( unsigned int i = 0; i < num_frag; i++ )
-	{
-		seqs[i] = new unsigned char [ mf[i] + 1 ];
-		memmove ( seqs[i], x + ind[i], mf[i] );
-		seqs[i][ mf[i] ] = '\0';
-	}
-#if 0
+#if 1 
 	int	 *	dups;
+
 
 	dups = new int [num_frag];
 	unsigned int uniq;
@@ -86,6 +84,7 @@ unsigned int WTM ( double z, string alphabet, vector < unsigned int > * Occ )
 		l_occ[i] = -1;
 	}
 
+
 	/* In case there exist duplicated fragments */
 	if ( uniq < num_frag ) 
 	{
@@ -96,8 +95,8 @@ unsigned int WTM ( double z, string alphabet, vector < unsigned int > * Occ )
 			if ( dups[i] < 0 )
 			{
 				seqs[i] = new unsigned char [ mf[i] + 1 ];
-				memmove ( seqs, x + ind[i], mf[i] );
-				seqs[i][i] = '\0';
+				memmove ( seqs[i], x + ind[i], mf[i] );
+				seqs[i][ mf[i] ] = '\0';
 			}
 			else
 			{
@@ -125,10 +124,10 @@ unsigned int WTM ( double z, string alphabet, vector < unsigned int > * Occ )
 		}
 	}
 #endif
-	int * frag_id	= new int [10000];
-	int * frag_occ	= new int [10000];
+	int * frag_id	= new int [ALLOC_SIZE];
+	int * frag_occ	= new int [ALLOC_SIZE];
 	unsigned int matches;
-	
+
 	gF = frag_id;
 	gP = frag_occ;
 	matches = gMatches;
@@ -142,27 +141,45 @@ unsigned int WTM ( double z, string alphabet, vector < unsigned int > * Occ )
 	for ( unsigned int i = 0; i < matches; i++ )
 	{
 		int id = frag_id[i];
-//		do 
-//		{
-			if ( ( frag_occ[i] >= F[id].start ) && ( n - frag_occ[i] >= m - F[id].start ) )
+		do 
+		{
+			unsigned int ystart = frag_occ[i] - F[id].start;
+			if ( find ( Occ->begin(), Occ->end(), ystart ) == Occ->end() ) 
 			{
-				unsigned int ystart = frag_occ[i] - F[id].start;
-				unsigned int flag = 1;
-				double prob_Occ = F[id].prob;
-
-				unsigned int j = 0;
-				while ( j < m )
+				if ( ( frag_occ[i] >= F[id].start ) && ( n - frag_occ[i] >= m - F[id].start ) )
 				{
-					if ( xy.text[ystart + j] < sigma )
+					unsigned int flag = 1;
+					double prob_Occ = F[id].prob;
+
+					unsigned int j = 0;
+					while ( j < m && ystart + j < n )
 					{
-						if ( xy.text[ystart + j] != xy.pattern[j] )
+						if ( xy.text[ystart + j] < sigma )
 						{
-							flag = 0;
-							break;
+							if ( xy.text[ystart + j] != xy.pattern[j] )
+							{
+								flag = 0;
+								break;
+							}
+							else
+							{
+								prob_Occ *= xy.prob[ystart + j];
+								if ( prob_Occ < 1/z )
+								{
+									flag = 0;
+									break;
+								}
+								else
+								{
+									j++;
+								}
+							}
 						}
 						else
 						{
-							prob_Occ *= xy.prob[j];
+							unsigned int row = xy.text[ystart + j] - sigma;
+							unsigned int col = xy.pattern[j];
+							prob_Occ *= xy.bptable[row][col];
 							if ( prob_Occ < 1/z )
 							{
 								flag = 0;
@@ -173,34 +190,22 @@ unsigned int WTM ( double z, string alphabet, vector < unsigned int > * Occ )
 								j++;
 							}
 						}
-					}
-					else
-					{
-						unsigned int row = xy.text[ystart + j] - sigma;
-						unsigned int col = xy.pattern[j];
-						prob_Occ *= xy.bptable[row][col];
-						if ( prob_Occ < 1/z )
+						if ( j == F[id].start )
 						{
-							flag = 0;
-							break;
-						}
-						else
-						{
-							j++;
+							j = F[id].end + 1;
 						}
 					}
-					if ( j == F[id].start )
+					if ( flag )
 					{
-						j = F[id].end + 1;
+						Occ->push_back( ystart );
+						num_Occ ++;
 					}
-				}
-				if ( flag )
-				{
-					Occ->push_back( ystart );
-					num_Occ ++;
 				}
 			}
-//		} while ( id != -1 );
+
+			id = d_occ[id];
+
+		} while ( id != -1 );
 	}
 
 	delete[] F;
@@ -212,12 +217,17 @@ unsigned int WTM ( double z, string alphabet, vector < unsigned int > * Occ )
 		delete[] seqs[i];
 	delete[] seqs;
 
+	gF = NULL;
+	gP = NULL;
+	gMatches = 0;
+	gMax_alloc_matches = ALLOC_SIZE;
+
 	cout << "num_Occ=" << num_Occ << endl;
 	return num_Occ;
 }
 
 
-				
+
 
 
 

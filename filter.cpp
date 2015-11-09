@@ -18,7 +18,7 @@
 
 #include <math.h>
 #include <stdlib.h>
-// #include "trie.h"						//include header for trie
+#include "trie.h"						//include header for trie
 
 void fragments ( int i, int j, int f, unsigned int m, int * mf, int * ind )
 {
@@ -42,7 +42,7 @@ void fragments ( int i, int j, int f, unsigned int m, int * mf, int * ind )
 	mf[j + i * f] = last - first + 1;
 }
 
-#if 0
+#if 1
 unsigned int extract_dups_single_str ( unsigned char * xx, unsigned int m, unsigned int f, int * mf, int * ind, int * dups )
 {
 	AlphaMap *      alphabet = NULL;
