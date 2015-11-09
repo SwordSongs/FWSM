@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstring>
+#include <set>
 
 #include "defs.h"
 #include "global.h"
@@ -144,42 +145,24 @@ unsigned int WTM ( double z, string alphabet, vector < unsigned int > * Occ )
 		do 
 		{
 			unsigned int ystart = frag_occ[i] - F[id].start;
-			if ( find ( Occ->begin(), Occ->end(), ystart ) == Occ->end() ) 
+			if ( ( frag_occ[i] >= F[id].start ) && ( n - frag_occ[i] >= m - F[id].start ) )
 			{
-				if ( ( frag_occ[i] >= F[id].start ) && ( n - frag_occ[i] >= m - F[id].start ) )
-				{
-					unsigned int flag = 1;
-					double prob_Occ = F[id].prob;
+				unsigned int flag = 1;
+				double prob_Occ = F[id].prob;
 
-					unsigned int j = 0;
-					while ( j < m && ystart + j < n )
+				unsigned int j = 0;
+				while ( j < m && ystart + j < n )
+				{
+					if ( xy.text[ystart + j] < sigma )
 					{
-						if ( xy.text[ystart + j] < sigma )
+						if ( xy.text[ystart + j] != xy.pattern[j] )
 						{
-							if ( xy.text[ystart + j] != xy.pattern[j] )
-							{
-								flag = 0;
-								break;
-							}
-							else
-							{
-								prob_Occ *= xy.prob[ystart + j];
-								if ( prob_Occ < 1/z )
-								{
-									flag = 0;
-									break;
-								}
-								else
-								{
-									j++;
-								}
-							}
+							flag = 0;
+							break;
 						}
 						else
 						{
-							unsigned int row = xy.text[ystart + j] - sigma;
-							unsigned int col = xy.pattern[j];
-							prob_Occ *= xy.bptable[row][col];
+							prob_Occ *= xy.prob[ystart + j];
 							if ( prob_Occ < 1/z )
 							{
 								flag = 0;
@@ -190,16 +173,30 @@ unsigned int WTM ( double z, string alphabet, vector < unsigned int > * Occ )
 								j++;
 							}
 						}
-						if ( j == F[id].start )
+					}
+					else
+					{
+						unsigned int row = xy.text[ystart + j] - sigma;
+						unsigned int col = xy.pattern[j];
+						prob_Occ *= xy.bptable[row][col];
+						if ( prob_Occ < 1/z )
 						{
-							j = F[id].end + 1;
+							flag = 0;
+							break;
+						}
+						else
+						{
+							j++;
 						}
 					}
-					if ( flag )
+					if ( j == F[id].start )
 					{
-						Occ->push_back( ystart );
-						num_Occ ++;
+						j = F[id].end + 1;
 					}
+				}
+				if ( flag )
+				{
+					Occ->push_back( ystart );
 				}
 			}
 
@@ -207,6 +204,12 @@ unsigned int WTM ( double z, string alphabet, vector < unsigned int > * Occ )
 
 		} while ( id != -1 );
 	}
+#if 1
+	/* remove the duplicates */
+	set < unsigned int > unique_Occ ( Occ->begin(), Occ->end() );
+	Occ->assign ( unique_Occ.begin(), unique_Occ.end() );
+#endif
+	num_Occ = Occ->size();
 
 	delete[] F;
 	delete[] ind;

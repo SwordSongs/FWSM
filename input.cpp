@@ -12,6 +12,7 @@ static struct option long_options[] =
 	{ "pattern",			required_argument,	NULL,	'p' },
 	{ "text",				required_argument,	NULL,	't' },
 	{ "output",				required_argument,	NULL,	'o' },
+	{ "threshold",			required_argument,	NULL,	'z'	},
 	{ "help",				0,					NULL,	'h' },
 };
 
@@ -21,7 +22,7 @@ int decode_switches ( int argc, char * argv[], struct TSwitch * sw )
 	char *ep;
 	int val;
 	int args;
-	string mod;
+	int mod;
 
 	/* initialisation */
 	sw -> z						=	1;
@@ -38,20 +39,12 @@ int decode_switches ( int argc, char * argv[], struct TSwitch * sw )
 				args ++;
 				break;
 			case 'm':
-				mod = optarg;
-				cout << mod << endl;
-				if ( optarg == "wpm" )
-				{
-					sw -> mod = 1;	
-				}
-				else if ( optarg == "wtm" )
-				{
-					sw -> mod = 2;
-				}
-				else
+				mod = strtol ( optarg, &ep, 10 );
+				if ( optarg == ep )
 				{
 					return 0;
 				}
+				sw -> mod = mod;
 				args ++;
 				break;
 			case 'p':
@@ -95,11 +88,11 @@ void usage ( void )
 	cout << "Usage: WPT <options>"  << endl;
 	cout << "Standard (Mandatory):" << endl;
 	cout << "	-a, --alphabet\t<str>\t'DNA' for nucleotide sequences." << endl;
-	cout << "	-m, --mode\t<str>\tchoose the model for program.\n\t 'wpm' for Weighted Pattern Match\n\t'wtm' for Weighted Text Matching" << endl;
+	cout << "	-m, --mode\t<int>\tchoose the model for program.\n\t\t '1' for Weighted Pattern Match (WPM) \n\t\t '2' for Weighted Text Matching (WTM)" << endl;
 	cout << "	-p, --pattern\t<str>\tFilename for Pattern." << endl;
 	cout << "	-t, --text\t<str>\tFilename for Text." << endl;
 	cout << "	-f, --output\t<str>\tFilename for result output." << endl;
-	cout << "	-z\t <dbl>\tcumulative weight threshold."<<endl;
+	cout << "	-z, --threshold\t <dbl>\tcumulative weight threshold."<<endl;
 }
 
 

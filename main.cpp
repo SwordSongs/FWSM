@@ -28,12 +28,11 @@ int main (int argc, char **argv)
 	unsigned int k;
 
 	/* Decodes the arguments */
-//	k = decode_switches ( argc, argv, &sw );
+	k = decode_switches ( argc, argv, &sw );
 
 	/* Check the arguments */
-/*	if ( k < 0 )
+	if ( k < 7 )
 	{
-		cout << "k = " << k  << endl;
 		usage();
 		return 1;
 	}
@@ -95,7 +94,7 @@ int main (int argc, char **argv)
 			output = sw.output_file_name;
 		}
 
-		if ( z > 0 )
+		if ( sw.z > 0 )
 		{
 			z = sw.z;
 		}
@@ -104,14 +103,9 @@ int main (int argc, char **argv)
 			cout << "Error: z must be a position integer!" << endl;
 		}
 	}
-*/
 	/* read input Weighted String */
-	ifstream fpattern ( "pattern" );
-	ifstream ftext ( "text" );
-	alphabet = DNA;
-	sigma = alphabet.size();
-	mod = 2;
-	z = 256;
+	ifstream fpattern ( pattern_file );
+	ifstream ftext ( text_file );
 	if ( fpattern.fail() )
 	{
 		cout << "Error: Cannot open pattern file!" << endl;
@@ -146,8 +140,8 @@ int main (int argc, char **argv)
 				{
 					y[i][j] = temptable[j + i * column];
 				}
-				n = row;
 			}
+			n = row;
 		}
 		else if ( mod == 2 )
 		{
@@ -171,12 +165,13 @@ int main (int argc, char **argv)
 				{
 					y[i][j] = temptable[j + i * column];
 				}
-				n = row;
 			}
+			n = row;
 		}
 	}
 	fpattern.close();
 	ftext.close();
+
 	preparation ( x, y, n, z, alphabet, mod );
 
 	switch ( mod )
@@ -191,7 +186,7 @@ int main (int argc, char **argv)
 
 	for ( unsigned int i = 0; i < num_Occ; i++ )
 	{
-		cout << Occ[i] << endl;
+		cout << "Pattern occurs at position:" << Occ[i] << endl;
 	}
 
 	return 0;
