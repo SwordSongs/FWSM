@@ -24,6 +24,10 @@ int main (int argc, char **argv)
 	unsigned int n;			//length of y
 	unsigned int num_Occ;
 	vector < unsigned int > Occ;
+	unsigned int column;
+	unsigned int row;
+
+	clock_t start, finish;
 
 	unsigned int k;
 
@@ -128,9 +132,8 @@ int main (int argc, char **argv)
 				fpattern >> temp;
 				temptable.push_back ( temp );
 			}
-			unsigned int column = sigma;
-			cout << column;
-			unsigned int row = temptable.size() / column;
+			column = sigma;
+			row = temptable.size() / column;
 			y = new double * [row];
 			for ( unsigned int i = 0; i < row; i++ )
 				y[i] = new double [column];
@@ -154,8 +157,8 @@ int main (int argc, char **argv)
 				ftext >> temp;
 				temptable.push_back ( temp );
 			}
-			unsigned int column = sigma;
-			unsigned int row = temptable.size() / column;
+			column = sigma;
+			row = temptable.size() / column;
 			y = new double * [row];
 			for ( unsigned int i = 0; i < row; i++ )
 				y[i] = new double [column];
@@ -172,6 +175,7 @@ int main (int argc, char **argv)
 	fpattern.close();
 	ftext.close();
 
+	start = clock();
 	preparation ( x, y, n, z, alphabet, mod );
 
 	switch ( mod )
@@ -183,11 +187,20 @@ int main (int argc, char **argv)
 			num_Occ = WTM ( z, alphabet, &Occ );
 			break;
 	}
+	finish = clock();
+
+	double passtime = ( ( double ) finish - start ) / CLOCKS_PER_SEC;
 
 	for ( unsigned int i = 0; i < num_Occ; i++ )
 	{
 		cout << "Pattern occurs at position:" << Occ[i] << endl;
 	}
+
+	cout << "time: " << passtime << "s" << endl;
+
+	for ( unsigned int i = 0; i < row; i++ )
+		delete[] y[i];
+	delete[] y;
 
 	return 0;
 }

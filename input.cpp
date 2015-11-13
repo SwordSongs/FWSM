@@ -85,7 +85,7 @@ int decode_switches ( int argc, char * argv[], struct TSwitch * sw )
 
 void usage ( void )
 {
-	cout << "Usage: WPT <options>"  << endl;
+	cout << "Usage: FWSM <options>"  << endl;
 	cout << "Standard (Mandatory):" << endl;
 	cout << "	-a, --alphabet\t<str>\t'DNA' for nucleotide sequences." << endl;
 	cout << "	-m, --mode\t<int>\tchoose the model for program.\n\t\t '1' for Weighted Pattern Match (WPM) \n\t\t '2' for Weighted Text Matching (WTM)" << endl;

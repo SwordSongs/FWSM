@@ -9,6 +9,7 @@
 #include "defs.h"
 #include "global.h"
 #include "aca.h"
+#include "sbom.h"
 
 using namespace std;
 
@@ -24,8 +25,7 @@ unsigned int WTM ( double z, string alphabet, vector < unsigned int > * Occ )
 	unsigned int n			= xy.text.size();
 	unsigned char * x		= new unsigned char [m + 1];
 	unsigned char * y		= new unsigned char [n + 1];
-	unsigned int l			= ceil ( log ( z ) / log ( z / ( z - 1 ) ) );
-	unsigned int num_frag	= l + 1;
+	unsigned int num_frag	= 1;
 	unsigned int num_Occ	= 0;
 
 	if ( num_frag > m )
@@ -39,8 +39,25 @@ unsigned int WTM ( double z, string alphabet, vector < unsigned int > * Occ )
 	}
 	x[m] = '\0';
 
-	for ( unsigned int i = 0; i < n; i++ )
+#if 0
+	y[0] = '@';
+	for ( unsigned int i = 1; i < n + 1; i++ )
 	{
+		unsigned int ch = xy.text[i-1];
+		if ( ch < sigma )
+		{
+			y[i] = alphabet[ch];
+		}
+		else
+		{
+			y[i] = '$';
+		}
+	}
+	y[n+1] = '\0';
+#endif
+	
+	for ( unsigned int i = 0; i < n; i++ )
+	{  
 		unsigned int ch = xy.text[i];
 		if ( ch < sigma )
 		{
@@ -52,6 +69,41 @@ unsigned int WTM ( double z, string alphabet, vector < unsigned int > * Occ )
 		}
 	}
 	y[n] = '\0';
+
+#if 1
+	for ( unsigned int i = 0; i < 20; i++ )
+	{
+		for ( unsigned int j = 0; j < 50; j++ )
+			cout << y[i*50 + j];
+		cout << endl;
+	}
+	cout << endl;
+#endif
+
+
+	unsigned int l = 0;
+	for ( unsigned int i = 0; i < m; i++ )
+	{
+		if ( y[i] == '$' )
+			l += 1;
+	}
+
+	unsigned int ll = l;
+	for ( unsigned int i = m; i < n; i++ )
+	{
+		if ( y[i] == '$' && y[ i - m ] != '$' )
+		{
+			ll += 1;
+		}
+		if ( y[i] != '$' && y[ i - m ] == '$' ) 
+		{
+			ll -= 1;
+		}
+		
+		if ( ll > l )
+			l = ll;
+	}	
+	num_frag = l + 1;
 
 	Factor * F	= new Factor [num_frag];
 	int	*	ind	= new int [num_frag];		//the starting position of fragments
@@ -68,9 +120,7 @@ unsigned int WTM ( double z, string alphabet, vector < unsigned int > * Occ )
 
 	/* Check whether there exist duplicated fragments */
 	unsigned char ** seqs;
-#if 1 
 	int	 *	dups;
-
 
 	dups = new int [num_frag];
 	unsigned int uniq;
@@ -85,11 +135,12 @@ unsigned int WTM ( double z, string alphabet, vector < unsigned int > * Occ )
 		l_occ[i] = -1;
 	}
 
-
 	/* In case there exist duplicated fragments */
 	if ( uniq < num_frag ) 
 	{
+		cout << "duplicates exist" << endl;
 		seqs = new unsigned char * [num_frag];
+		cout << "new: " << seqs << endl;
 		for ( unsigned int i = 0; i < num_frag; i++ )
 		{
 			/* Add the fragment once */
@@ -104,7 +155,6 @@ unsigned int WTM ( double z, string alphabet, vector < unsigned int > * Occ )
 				/* add nothing since it is already added */
 				seqs[i] = new unsigned char [1];
 				seqs[i][0] = '\0';
-
 				if ( l_occ[dups[i]] == -1 )
 					d_occ[dups[i]] = i;
 				else
@@ -124,11 +174,40 @@ unsigned int WTM ( double z, string alphabet, vector < unsigned int > * Occ )
 			seqs[i][mf[i]] = '\0';
 		}
 	}
-#endif
+
+	unsigned char ** seqs_uniq = new unsigned char * [uniq];
+	
+	if ( num_frag > uniq )
+	{
+		unsigned int j = 0;
+		unsigned int k = 0;
+		while ( j < num_frag )
+		{
+			if ( strlen ( ( char * ) seqs[j] ) != 0 )
+			{
+				seqs_uniq[k] = seqs[j];
+				++ k;
+				++ j;
+			}
+			else
+			{
+				++ j;
+			}
+		}
+	}
+	else
+	{
+		for ( unsigned int i = 0; i < num_frag; i++ )
+		{
+			seqs_uniq[i] = seqs[i];
+		}
+	}
+
 	int * frag_id	= new int [ALLOC_SIZE];
 	int * frag_occ	= new int [ALLOC_SIZE];
-	unsigned int matches;
-
+	int matches;
+#if 1 
+	/* Aho Corasick */
 	gF = frag_id;
 	gP = frag_occ;
 	matches = gMatches;
@@ -138,6 +217,14 @@ unsigned int WTM ( double z, string alphabet, vector < unsigned int > * Occ )
 	frag_id	 = gF;
 	frag_occ = gP;
 	matches = gMatches;
+#endif
+
+#if 0
+	/* sbom */
+	matches = SBOM( seqs_uniq, uniq, y, n + 1, frag_id, frag_occ );
+	cout << "after SBOM, matches = " << matches << endl;
+
+#endif
 
 	for ( unsigned int i = 0; i < matches; i++ )
 	{
@@ -148,21 +235,44 @@ unsigned int WTM ( double z, string alphabet, vector < unsigned int > * Occ )
 			if ( ( frag_occ[i] >= F[id].start ) && ( n - frag_occ[i] >= m - F[id].start ) )
 			{
 				unsigned int flag = 1;
-				double prob_Occ = F[id].prob;
+				double prob_Occ = 1;
 
-				unsigned int j = 0;
-				while ( j < m && ystart + j < n )
+				for ( unsigned int ii = frag_occ[i]; ii < frag_occ[i] + F[id].length - 1; ii++ )
 				{
-					if ( xy.text[ystart + j] < sigma )
+					prob_Occ *= xy.prob[ii];
+				}
+
+				if ( prob_Occ >= 1/z )
+				{
+					unsigned int j = 0;
+					while ( j < m && ystart + j < n )
 					{
-						if ( xy.text[ystart + j] != xy.pattern[j] )
+						if ( xy.text[ystart + j] < sigma )
 						{
-							flag = 0;
-							break;
+							if ( xy.text[ystart + j] != xy.pattern[j] )
+							{
+								flag = 0;
+								break;
+							}
+							else
+							{
+								prob_Occ *= xy.prob[ystart + j];
+								if ( prob_Occ < 1/z )
+								{
+									flag = 0;
+									break;
+								}
+								else
+								{
+									j++;
+								}
+							}
 						}
 						else
 						{
-							prob_Occ *= xy.prob[ystart + j];
+							unsigned int row = xy.text[ystart + j] - sigma;
+							unsigned int col = xy.pattern[j];
+							prob_Occ *= xy.bptable[row][col];
 							if ( prob_Occ < 1/z )
 							{
 								flag = 0;
@@ -173,30 +283,16 @@ unsigned int WTM ( double z, string alphabet, vector < unsigned int > * Occ )
 								j++;
 							}
 						}
-					}
-					else
-					{
-						unsigned int row = xy.text[ystart + j] - sigma;
-						unsigned int col = xy.pattern[j];
-						prob_Occ *= xy.bptable[row][col];
-						if ( prob_Occ < 1/z )
+						if ( j == F[id].start )
 						{
-							flag = 0;
-							break;
-						}
-						else
-						{
-							j++;
+							j = F[id].end + 1;
 						}
 					}
-					if ( j == F[id].start )
+
+					if ( flag )
 					{
-						j = F[id].end + 1;
+						Occ->push_back( ystart );
 					}
-				}
-				if ( flag )
-				{
-					Occ->push_back( ystart );
 				}
 			}
 
@@ -204,21 +300,33 @@ unsigned int WTM ( double z, string alphabet, vector < unsigned int > * Occ )
 
 		} while ( id != -1 );
 	}
+	cout << " after matching " << endl;
 #if 1
 	/* remove the duplicates */
 	set < unsigned int > unique_Occ ( Occ->begin(), Occ->end() );
 	Occ->assign ( unique_Occ.begin(), unique_Occ.end() );
 #endif
 	num_Occ = Occ->size();
-
+	cout << " after set " << endl;
 	delete[] F;
 	delete[] ind;
 	delete[] mf;
 	delete[] frag_id;
 	delete[] frag_occ;
-	for ( unsigned int i = 0; i < num_frag; i++ )
+	delete[] dups;
+	delete[] d_occ;
+	delete[] l_occ;
+	delete[] seqs_uniq;
+
+	for ( unsigned int i = 0; i < num_frag; ++i )
+	{
 		delete[] seqs[i];
+	}
+	cout << "\ndelete: " << seqs << endl;
 	delete[] seqs;
+
+	delete[] x;
+	delete[] y;
 
 	gF = NULL;
 	gP = NULL;
