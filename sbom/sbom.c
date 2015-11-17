@@ -13,12 +13,26 @@
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 // Set Backward Oracle Matching
-int SBOM(unsigned char **X, int k, unsigned char *y, int n, int * F, int * P) {
+int SBOM(unsigned char **x, int k, int uniq, unsigned char *y, int n, int * F, int * P) {
    int i, j, lmin, p;
    Automaton automaton;
    Node current, root;
    ListOfIntegers cell;
    int num_occ = 0;
+   unsigned char ** X;
+   X = ( unsigned char ** ) malloc ( uniq * sizeof ( unsigned char * ) );
+	
+   int qq = 0;
+   for ( int q = 0; q < k; q++ )
+   {
+	   if ( sizeof ( ( char * ) x[q] ) > 1 )
+	   {
+		   X[qq] = x[q];
+		   ++ qq;
+	   }
+   }
+
+   k = uniq;
 
    lmin = strlen((char*)X[0]);
    for (i=1; i < k; ++i) {
@@ -69,5 +83,8 @@ int SBOM(unsigned char **X, int k, unsigned char *y, int n, int * F, int * P) {
          j += (lmin-i)+1;
       }
    }
+
+   free ( X );
+
    return num_occ;
 }

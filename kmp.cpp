@@ -1,7 +1,5 @@
 #include <vector>
 
-#include "kmp.h"
-
 using namespace std;
 
 void preKMP ( unsigned int * x, unsigned int m, int kmpNext[] )

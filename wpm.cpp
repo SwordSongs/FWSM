@@ -3,7 +3,6 @@
 #include <string>
 #include <map>
 
-#include "kmp.h"
 #include "defs.h"
 #include "global.h"
 
@@ -11,7 +10,6 @@ using namespace std;
 
 unsigned int WPM ( double z, string alphabet, vector < unsigned int > * Occ )
 {
-	cout << "WPM:wpm" << endl;
 	unsigned int sigma = alphabet.size();		//size of alphabet
 	unsigned int num_Occ = 0;					//the number of occurrence of x in y
 	unsigned int m = xy.pattern.size();			//length of pattern
@@ -42,10 +40,6 @@ unsigned int WPM ( double z, string alphabet, vector < unsigned int > * Occ )
 			f.end = xy.BP[i] - 1;
 		}
 	}
-
-	cout << "FACTOR:" << endl;
-	cout << "length=" << f.length << endl;
-	cout << "start=" << f.start << "\tend=" << f.end << endl;
 
 	f.str = &xy.pattern[f.start];
 

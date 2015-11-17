@@ -28,6 +28,8 @@ unsigned int WTM ( double z, string alphabet, vector < unsigned int > * Occ )
 	unsigned int num_frag	= 1;
 	unsigned int num_Occ	= 0;
 
+	cout << "pattern length: " << m << "\ntext length: " << n << endl;
+
 	if ( num_frag > m )
 	{
 		num_frag = m;
@@ -38,23 +40,6 @@ unsigned int WTM ( double z, string alphabet, vector < unsigned int > * Occ )
 		x[i] = alphabet[ xy.pattern[i] ];
 	}
 	x[m] = '\0';
-
-#if 0
-	y[0] = '@';
-	for ( unsigned int i = 1; i < n + 1; i++ )
-	{
-		unsigned int ch = xy.text[i-1];
-		if ( ch < sigma )
-		{
-			y[i] = alphabet[ch];
-		}
-		else
-		{
-			y[i] = '$';
-		}
-	}
-	y[n+1] = '\0';
-#endif
 	
 	for ( unsigned int i = 0; i < n; i++ )
 	{  
@@ -69,17 +54,6 @@ unsigned int WTM ( double z, string alphabet, vector < unsigned int > * Occ )
 		}
 	}
 	y[n] = '\0';
-
-#if 1
-	for ( unsigned int i = 0; i < 20; i++ )
-	{
-		for ( unsigned int j = 0; j < 50; j++ )
-			cout << y[i*50 + j];
-		cout << endl;
-	}
-	cout << endl;
-#endif
-
 
 	unsigned int l = 0;
 	for ( unsigned int i = 0; i < m; i++ )
@@ -134,13 +108,11 @@ unsigned int WTM ( double z, string alphabet, vector < unsigned int > * Occ )
 		d_occ[i] = -1;
 		l_occ[i] = -1;
 	}
-
+ 
 	/* In case there exist duplicated fragments */
 	if ( uniq < num_frag ) 
 	{
-		cout << "duplicates exist" << endl;
 		seqs = new unsigned char * [num_frag];
-		cout << "new: " << seqs << endl;
 		for ( unsigned int i = 0; i < num_frag; i++ )
 		{
 			/* Add the fragment once */
@@ -175,37 +147,10 @@ unsigned int WTM ( double z, string alphabet, vector < unsigned int > * Occ )
 		}
 	}
 
-	unsigned char ** seqs_uniq = new unsigned char * [uniq];
-	
-	if ( num_frag > uniq )
-	{
-		unsigned int j = 0;
-		unsigned int k = 0;
-		while ( j < num_frag )
-		{
-			if ( strlen ( ( char * ) seqs[j] ) != 0 )
-			{
-				seqs_uniq[k] = seqs[j];
-				++ k;
-				++ j;
-			}
-			else
-			{
-				++ j;
-			}
-		}
-	}
-	else
-	{
-		for ( unsigned int i = 0; i < num_frag; i++ )
-		{
-			seqs_uniq[i] = seqs[i];
-		}
-	}
-
 	int * frag_id	= new int [ALLOC_SIZE];
 	int * frag_occ	= new int [ALLOC_SIZE];
 	int matches;
+
 #if 1 
 	/* Aho Corasick */
 	gF = frag_id;
@@ -221,7 +166,7 @@ unsigned int WTM ( double z, string alphabet, vector < unsigned int > * Occ )
 
 #if 0
 	/* sbom */
-	matches = SBOM( seqs_uniq, uniq, y, n + 1, frag_id, frag_occ );
+	matches = SBOM( seqs, num_frag, uniq, y, n, frag_id, frag_occ );
 	cout << "after SBOM, matches = " << matches << endl;
 
 #endif
@@ -300,14 +245,14 @@ unsigned int WTM ( double z, string alphabet, vector < unsigned int > * Occ )
 
 		} while ( id != -1 );
 	}
-	cout << " after matching " << endl;
+
 #if 1
 	/* remove the duplicates */
 	set < unsigned int > unique_Occ ( Occ->begin(), Occ->end() );
 	Occ->assign ( unique_Occ.begin(), unique_Occ.end() );
 #endif
 	num_Occ = Occ->size();
-	cout << " after set " << endl;
+
 	delete[] F;
 	delete[] ind;
 	delete[] mf;
@@ -316,30 +261,26 @@ unsigned int WTM ( double z, string alphabet, vector < unsigned int > * Occ )
 	delete[] dups;
 	delete[] d_occ;
 	delete[] l_occ;
-	delete[] seqs_uniq;
 
 	for ( unsigned int i = 0; i < num_frag; ++i )
 	{
 		delete[] seqs[i];
 	}
-	cout << "\ndelete: " << seqs << endl;
 	delete[] seqs;
 
 	delete[] x;
 	delete[] y;
 
+#if 1
 	gF = NULL;
 	gP = NULL;
 	gMatches = 0;
 	gMax_alloc_matches = ALLOC_SIZE;
+#endif
 
 	cout << "num_Occ=" << num_Occ << endl;
 	return num_Occ;
 }
-
-
-
-
 
 
 

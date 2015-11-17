@@ -30,4 +30,4 @@ triple.o: triple.c $(HEADERS)
 	g++ -c triple.c $(CFLAGS)
 
 clean:
-	rm -f ahocorasick.o node.o $(LIBNAME)
+	rm -f sbom.o dawg.o listOfIntegers.o multirf.o fifo.o listOfNumbers.o oracle.o triple.o $(LIBNAME)

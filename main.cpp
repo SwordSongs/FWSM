@@ -189,6 +189,11 @@ int main (int argc, char **argv)
 	}
 	finish = clock();
 
+
+	cout << "Number of Occurrences: " << num_Occ << endl;
+	for ( unsigned int i = 0; i < num_Occ; i++ )
+		cout << "Pattern occurs at position " << Occ[i] << endl;
+
 	double passtime = ( ( double ) finish - start ) / CLOCKS_PER_SEC;
 
 	for ( unsigned int i = 0; i < num_Occ; i++ )
