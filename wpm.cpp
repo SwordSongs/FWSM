@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include <map>
+#include <set>
 
 #include "defs.h"
 #include "global.h"
@@ -14,30 +14,46 @@ unsigned int WPM ( double z, string alphabet, vector < unsigned int > * Occ )
 	unsigned int num_Occ = 0;					//the number of occurrence of x in y
 	unsigned int m = xy.pattern.size();			//length of pattern
 	unsigned int n = xy.text.size();			//length of text
-
-	unsigned int num_bp = xy.BP.size();
+	cout << "Pattern Length:" << m << "\tText Lenght:" << n << endl;
 	
+	unsigned int num_bp = xy.BP.size();
+
 	if ( num_bp >= m )								//the number of black position must be smaller than the length of x
 	{
 		cout << "Error: too many black position in weighted string x!" << endl;
 		return 0;
 	}
-	
+
 	/* Find the longest factor f in x with no black position */
 	Factor f;
 	f.length = 0;
 	f.prob = 1;
-	for ( unsigned int i = 0; i < num_bp; i++ )
-		cout << xy.BP[i] << ' ';
-	cout << endl;
 
-	for ( unsigned int i = 1; i < num_bp; i++ )
+	if ( num_bp == 1 )
 	{
-		if ( f.length < xy.BP[i] - xy.BP[i-1] - 1 )
+		if ( xy.BP[0] > m - xy.BP[0] - 1 )
 		{
-			f.length = xy.BP[i] - xy.BP[i-1] - 1;
-			f.start = xy.BP[i-1] + 1;
-			f.end = xy.BP[i] - 1;
+			f.length = xy.BP[0];
+			f.start = 0;
+			f.end = xy.BP[0] - 1;
+		}
+		else
+		{
+			f.length = m - xy.BP[0] - 1;
+			f.start = xy.BP[0] + 1;
+			f.end = m - 1;
+		}
+	}
+	else
+	{
+		for ( unsigned int i = 1; i < num_bp; i++ )
+		{
+			if ( f.length < xy.BP[i] - xy.BP[i-1] - 1 )
+			{
+				f.length = xy.BP[i] - xy.BP[i-1] - 1;
+				f.start = xy.BP[i-1] + 1;
+				f.end = xy.BP[i] - 1;
+			}
 		}
 	}
 
@@ -117,10 +133,15 @@ unsigned int WPM ( double z, string alphabet, vector < unsigned int > * Occ )
 			if ( flag )
 			{
 				Occ->push_back ( ystart );
-				num_Occ ++;
 			}
 		}
 	}
+
+	/* remove the duplicates */
+	set < unsigned int > unique_Occ ( Occ->begin(), Occ->end() );
+	Occ->assign ( unique_Occ.begin(), unique_Occ.end() );
+
+	num_Occ = Occ->size();
 
 	return num_Occ;
 }

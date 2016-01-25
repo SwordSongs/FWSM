@@ -26,6 +26,7 @@ int main (int argc, char **argv)
 	vector < unsigned int > Occ;
 	unsigned int column;
 	unsigned int row;
+	ofstream result;
 
 	clock_t start, finish;
 
@@ -42,23 +43,6 @@ int main (int argc, char **argv)
 	}
 	else
 	{
-		if ( sw.alphabet.compare ( "DNA" ) == 0 )
-		{
-			alphabet = DNA;
-			sigma = alphabet.size();
-		}
-		else if ( sw.alphabet.compare ( "dna" ) == 0 )
-		{
-			alphabet = dna;
-			sigma = alphabet.size();
-		}
-		else
-		{
-			cout << "Error: Only support DNA alphabet up to now!" << endl;
-			return 0;
-		}
-
-		mod = sw.mod;
 		if ( sw.mod > 2 )
 		{	
 			cout << "Error: Mode (-m) not correct!" << endl;
@@ -108,6 +92,8 @@ int main (int argc, char **argv)
 		}
 	}
 	/* read input Weighted String */
+	alphabet = DNA;
+	sigma = alphabet.size();
 	ifstream fpattern ( pattern_file );
 	ifstream ftext ( text_file );
 	if ( fpattern.fail() )
@@ -125,15 +111,17 @@ int main (int argc, char **argv)
 		{
 			/* WPM */
 			ftext >> x;
-			vector < double > temptable;
 			double temp;
+			long int num_pattern = 0;
 			while ( !fpattern.eof () )
 			{
 				fpattern >> temp;
-				temptable.push_back ( temp );
+				num_pattern ++;
 			}
+			fpattern.clear();
+			fpattern.seekg( 0, ios::beg );
 			column = sigma;
-			row = temptable.size() / column;
+			row = num_pattern / column;
 			y = new double * [row];
 			for ( unsigned int i = 0; i < row; i++ )
 				y[i] = new double [column];
@@ -141,7 +129,7 @@ int main (int argc, char **argv)
 			{
 				for ( unsigned int j = 0; j < column; j++ )
 				{
-					y[i][j] = temptable[j + i * column];
+					fpattern >> y[i][j];
 				}
 			}
 			n = row;
@@ -150,15 +138,17 @@ int main (int argc, char **argv)
 		{
 			/* WTM */
 			fpattern >> x;
-			vector < double > temptable;
 			double temp;
+			long int num_text = 0;
 			while ( !ftext.eof () )
 			{
 				ftext >> temp;
-				temptable.push_back ( temp );
+				num_text ++;
 			}
+			ftext.clear();
+			ftext.seekg( 0, ios::beg );
 			column = sigma;
-			row = temptable.size() / column;
+			row = num_text / column;
 			y = new double * [row];
 			for ( unsigned int i = 0; i < row; i++ )
 				y[i] = new double [column];
@@ -166,7 +156,7 @@ int main (int argc, char **argv)
 			{
 				for ( unsigned int j = 0; j < column; j++ )
 				{
-					y[i][j] = temptable[j + i * column];
+					ftext >> y[i][j];
 				}
 			}
 			n = row;
@@ -176,6 +166,8 @@ int main (int argc, char **argv)
 	ftext.close();
 
 	start = clock();
+
+	m = x.length();
 	preparation ( x, y, n, z, alphabet, mod );
 
 	switch ( mod )
@@ -187,21 +179,35 @@ int main (int argc, char **argv)
 			num_Occ = WTM ( z, alphabet, &Occ );
 			break;
 	}
+
 	finish = clock();
-
-
-	cout << "Number of Occurrences: " << num_Occ << endl;
-	for ( unsigned int i = 0; i < num_Occ; i++ )
-		cout << "Pattern occurs at position " << Occ[i] << endl;
-
 	double passtime = ( ( double ) finish - start ) / CLOCKS_PER_SEC;
-
-	for ( unsigned int i = 0; i < num_Occ; i++ )
-	{
-		cout << "Pattern occurs at position:" << Occ[i] << endl;
-	}
-
+	
+	cout << "Number of Occurrences: " << num_Occ << endl;
 	cout << "time: " << passtime << "s" << endl;
+
+#if 1
+	result.open ( output );
+	if ( num_Occ == 0 )
+	{
+		result << "No Occurrences is found.\n";
+	}
+	else
+	{
+		result << "Positions of Occurrences:\n";
+		for ( unsigned int i = 0; i < num_Occ; i++ )
+			result << Occ[i] << '\n';
+	}
+#endif
+
+#if 0
+	result.open ( "wsm.dat", ios::app );
+	if ( mod == 1 )
+		result << n << "\t" << passtime << endl;
+	if ( mod == 2 )
+		result << m << "\t" << passtime << endl;
+	result.close();
+#endif
 
 	for ( unsigned int i = 0; i < row; i++ )
 		delete[] y[i];

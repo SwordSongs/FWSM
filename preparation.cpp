@@ -20,10 +20,15 @@ void preparation ( string x, double ** y, unsigned int n, double z, string alpha
 	vector < double > yprob;
 	vector < vector < double > > ybptable;
 
+	xstr.reserve ( m );
+
 	for ( unsigned int i = 0; i < m; i++ )
 	{
 		xstr.push_back ( alphabet.find ( x[i] ) );
 	}
+
+	ystr.reserve ( n );
+	yprob.reserve ( n );
 
 	for ( unsigned int i = 0; i < n; i++ )
 	{
@@ -37,7 +42,7 @@ void preparation ( string x, double ** y, unsigned int n, double z, string alpha
 				letter = j;
 			}
 		}
-		if ( max > 1 - 1/z )
+		if ( max >= 1 - 1/z )
 		{
 			ystr.push_back ( letter );
 			yprob.push_back ( max );
@@ -72,5 +77,12 @@ void preparation ( string x, double ** y, unsigned int n, double z, string alpha
 		xy.prob = yprob;
 		xy.bptable = ybptable;
 	}
+	xstr.clear();
+	ystr.clear();
+	yprob.clear();
+
+	vector < unsigned int > ().swap ( xstr );
+	vector < unsigned int > ().swap ( ystr );
+	vector < double > ().swap ( yprob );
 }
 

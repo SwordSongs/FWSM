@@ -9,7 +9,6 @@
 #include "defs.h"
 #include "global.h"
 #include "aca.h"
-#include "sbom.h"
 
 using namespace std;
 
@@ -28,12 +27,7 @@ unsigned int WTM ( double z, string alphabet, vector < unsigned int > * Occ )
 	unsigned int num_frag	= 1;
 	unsigned int num_Occ	= 0;
 
-	cout << "pattern length: " << m << "\ntext length: " << n << endl;
-
-	if ( num_frag > m )
-	{
-		num_frag = m;
-	}
+	cout << "pattern length: " << m << "\t text length: " << n << endl;
 
 	for ( unsigned int i = 0; i < m; i++ )
 	{
@@ -164,13 +158,6 @@ unsigned int WTM ( double z, string alphabet, vector < unsigned int > * Occ )
 	matches = gMatches;
 #endif
 
-#if 0
-	/* sbom */
-	matches = SBOM( seqs, num_frag, uniq, y, n, frag_id, frag_occ );
-	cout << "after SBOM, matches = " << matches << endl;
-
-#endif
-
 	for ( unsigned int i = 0; i < matches; i++ )
 	{
 		int id = frag_id[i];
@@ -278,7 +265,6 @@ unsigned int WTM ( double z, string alphabet, vector < unsigned int > * Occ )
 	gMax_alloc_matches = ALLOC_SIZE;
 #endif
 
-	cout << "num_Occ=" << num_Occ << endl;
 	return num_Occ;
 }
 

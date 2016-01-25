@@ -7,7 +7,6 @@
 
 static struct option long_options[] =
 {
-	{ "alphabet",			required_argument,	NULL,	'a'	},
 	{ "mode",				required_argument,	NULL,	'm' },
 	{ "pattern",			required_argument,	NULL,	'p' },
 	{ "text",				required_argument,	NULL,	't' },
@@ -20,7 +19,7 @@ int decode_switches ( int argc, char * argv[], struct TSwitch * sw )
 {
 	int opt;
 	char *ep;
-	int val;
+	double val;
 	int args;
 	int mod;
 
@@ -30,14 +29,10 @@ int decode_switches ( int argc, char * argv[], struct TSwitch * sw )
 
 	args = 0;
 
-	while ( ( opt = getopt_long ( argc, argv, "a:m:p:t:o:z:h", long_options, NULL ) ) != -1 )
+	while ( ( opt = getopt_long ( argc, argv, "m:p:t:o:z:h", long_options, NULL ) ) != -1 )
 	{
 		switch ( opt )
 		{
-			case 'a':
-				sw -> alphabet = optarg;
-				args ++;
-				break;
 			case 'm':
 				mod = strtol ( optarg, &ep, 10 );
 				if ( optarg == ep )
@@ -60,7 +55,7 @@ int decode_switches ( int argc, char * argv[], struct TSwitch * sw )
 				args ++;
 				break;
 			case 'z':
-				val = strtol ( optarg, &ep, 10 );
+				val = strtod ( optarg, &ep );
 				if ( optarg == ep )
 				{
 					return 0;
@@ -73,9 +68,8 @@ int decode_switches ( int argc, char * argv[], struct TSwitch * sw )
 		}
 	}
 
-	if ( args < 4 )
+	if ( args < 5 )
 	{
-		cout << "args < 4" << endl;
 		usage();
 		exit ( 1 );
 	}
@@ -85,13 +79,12 @@ int decode_switches ( int argc, char * argv[], struct TSwitch * sw )
 
 void usage ( void )
 {
-	cout << "Usage: FWSM <options>"  << endl;
+	cout << "Usage: fwsm <options>"  << endl;
 	cout << "Standard (Mandatory):" << endl;
-	cout << "	-a, --alphabet\t<str>\t'DNA' for nucleotide sequences." << endl;
 	cout << "	-m, --mode\t<int>\tchoose the model for program.\n\t\t '1' for Weighted Pattern Match (WPM) \n\t\t '2' for Weighted Text Matching (WTM)" << endl;
 	cout << "	-p, --pattern\t<str>\tFilename for Pattern." << endl;
 	cout << "	-t, --text\t<str>\tFilename for Text." << endl;
-	cout << "	-f, --output\t<str>\tFilename for result output." << endl;
+	cout << "	-f, --output\t<str>\tFilename for output." << endl;
 	cout << "	-z, --threshold\t <dbl>\tcumulative weight threshold."<<endl;
 }
 
