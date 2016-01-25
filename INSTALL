@@ -1,0 +1,26 @@
+
+Pre-installation Instructions
+=============================
+
+   This installation requires the pre-installation of the library libdatrie and MultiFast (Aho-corasick automaton)
+
+   For Linux, you can install above via
+
+    $ ./pre-install.sh
+
+Basic Instructions
+==================
+
+   Make sure you have uncommented the analogous function of the library
+   you would like to test in file `main.cpp'. The shell command `make' 
+   should compile this example program. 
+
+   After compilation the binary `fwsm' will be created in the working 
+   directory, e.g. you may call it from this directory via
+
+   For weighted pattern matching
+   $ ./fwsm -m 1 -z 16 -t ./data/text1.txt -p ./data/pattern1.txt -o output.txt
+
+   For weighted text matching
+   $ ./fwsm -m 2 -z 16 -t ./data/text2.txt -p ./data/pattern2.txt -o output.txt
+
