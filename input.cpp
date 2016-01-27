@@ -84,7 +84,7 @@ void usage ( void )
 	cout << "	-m, --mode\t<int>\tchoose the model for program.\n\t\t '1' for Weighted Pattern Match (WPM) \n\t\t '2' for Weighted Text Matching (WTM)" << endl;
 	cout << "	-p, --pattern\t<str>\tFilename for Pattern." << endl;
 	cout << "	-t, --text\t<str>\tFilename for Text." << endl;
-	cout << "	-f, --output\t<str>\tFilename for output." << endl;
+	cout << "	-o, --output\t<str>\tFilename for output." << endl;
 	cout << "	-z, --threshold\t <dbl>\tcumulative weight threshold."<<endl;
 }
 
